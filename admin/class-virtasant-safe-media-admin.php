@@ -107,21 +107,22 @@ class Virtasant_Safe_Media_Admin
 
     public function vitrasant_edit_term_fields($taxonomy)
     {
-        ?>
-        <div class="form-field">
-            <tr class="form-field">
-                <th>
-                    <label for="vitrasant-upload"><?php _e('Picture of the category', ''); ?></label>
-                </th>
-                <td>
-                    <input type="file" class="button vitrasant-upload" id="vitrasant-upload" value="Upload Image"
-                           name="vitrasant_img"/>
-                </td>
-                <br>
-            </tr>
+        $prefix = 'vitrasant_';
 
-        </div>
-        <?php
+        $cmb = new_cmb2_box([
+            'id' => $prefix . 'metabox',
+            'title' => esc_html__('Category Metabox', 'cmb2'),
+            'object_types' => ['term'], // Only display on category pages
+            'taxonomies' => ['category'], // Only display on category taxonomy
+        ]);
+
+        $cmb->add_field([
+            'name' => esc_html__('Custom Field', 'cmb2'),
+            'id' => $prefix . 'upload_image',
+            'type' => 'file',
+            'desc' => esc_html__('Enter your custom field description', 'cmb2'),
+        ]);
+        //$custom_field_value = get_term_meta( get_queried_object_id(), 'vitrasant_upload_image', true );
     }
 
 }

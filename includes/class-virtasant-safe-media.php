@@ -156,8 +156,7 @@ class Virtasant_Safe_Media {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-        $this->loader->add_action( 'category_add_form_fields',$plugin_admin, 'vitrasant_edit_term_fields' );
-        $this->loader->add_action( 'category_edit_form_fields',$plugin_admin, 'vitrasant_edit_term_fields' ,   );
+        $this->loader->add_action( 'cmb2_admin_init',$plugin_admin, 'vitrasant_edit_term_fields'  );
 
 	}
 
