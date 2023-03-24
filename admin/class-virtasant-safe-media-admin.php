@@ -105,7 +105,7 @@ class Virtasant_Safe_Media_Admin
     }
 
 
-    public function vitrasant_edit_term_fields($taxonomy)
+    public function vitrasant_edit_term_fields()
     {
         $prefix = 'vitrasant_';
 
@@ -124,5 +124,43 @@ class Virtasant_Safe_Media_Admin
         ]);
         //$custom_field_value = get_term_meta( get_queried_object_id(), 'vitrasant_upload_image', true );
     }
+
+    public function vitrasant_disable_media_deletion($post_ID)
+    {
+
+        $this->vitrasant_prevent_featured_image_deletion($post_ID);
+        //$this->prevent_content_image_deletion($post_ID);
+        wp_die(__('Main You cannot delete this image because it is being used as a in an article.', 'text-domain'));
+
+    }
+
+    public function vitrasant_prevent_featured_image_deletion($post_ID)
+    {
+        $featured_image_query = new WP_Query(array(
+            'post_type' => 'post',
+            'meta_key' => '_thumbnail_id',
+            'meta_value' => $post_ID
+        ));
+        $post_url =[];
+        if ($featured_image_query->have_posts()) {
+            while ($featured_image_query->have_posts()) {
+                $featured_image_query->the_post();
+                $id = get_the_ID();
+                $post_url[$id] = add_query_arg( [
+                    'post' => $id,
+                    'action' => 'edit',
+                ], admin_url( 'post.php' ) );
+            }
+            $comma_separated = "";
+            if(!empty($post_url)) {
+                foreach ($post_url as $key => $single) {
+                    $comma_separated .= "<a href='$single'>$key</a> ";
+                }
+            }
+            wp_die('This image cannot be deleted because it is being used as a featured image. ' .$comma_separated );
+        }
+    }
+
+
 
 }
