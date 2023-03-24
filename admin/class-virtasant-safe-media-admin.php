@@ -104,6 +104,11 @@ class Virtasant_Safe_Media_Admin
 
     }
 
+    /**
+     * Adding CMB2 Term Image (cmb2_admin_init).
+     *
+     * @since    1.0.0
+     */
 
     public function vitrasant_edit_term_fields()
     {
@@ -125,15 +130,29 @@ class Virtasant_Safe_Media_Admin
         //$custom_field_value = get_term_meta( get_queried_object_id(), 'vitrasant_upload_image', true );
     }
 
+
+    /**
+     * Disable media deletion hook attached (delete_attachment).
+     *
+     * @since    1.0.0
+     */
+
     public function vitrasant_disable_media_deletion($post_ID)
     {
 
         $this->vitrasant_prevent_featured_image_deletion($post_ID);
         //$this->prevent_content_image_deletion($post_ID);
-        wp_die(__('Main You cannot delete this image because it is being used as a in an article.', 'text-domain'));
+        wp_die(__('Main You cannot delete this image because it is being used as a in an article.', 'virtasant-safe-media'));
 
     }
 
+
+    /**
+     * Disable media deletion Featured Image Check.
+     *
+     * @since    1.0.0
+     * @return  null or error
+     */
     public function vitrasant_prevent_featured_image_deletion($post_ID)
     {
         $featured_image_query = new WP_Query(array(
@@ -157,7 +176,7 @@ class Virtasant_Safe_Media_Admin
                     $comma_separated .= "<a href='$single'>$key</a> ";
                 }
             }
-            wp_die('This image cannot be deleted because it is being used as a featured image. ' .$comma_separated );
+            wp_die(__('This image cannot be deleted because it is being used as a featured image. ' .$comma_separated , 'virtasant-safe-media' ));
         }
     }
 
