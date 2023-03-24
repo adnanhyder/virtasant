@@ -105,7 +105,7 @@ class Virtasant_Safe_Media_Admin
     }
 
     /**
-     * Adding CMB2 Term Image (cmb2_admin_init).
+     * Adding CMB2 Term Image hook attached (cmb2_admin_init).
      *
      * @since    1.0.0
      */
@@ -141,7 +141,7 @@ class Virtasant_Safe_Media_Admin
     {
 
         $this->vitrasant_prevent_featured_image_deletion($post_ID);
-        //$this->prevent_content_image_deletion($post_ID);
+        $this->vitrasant_prevent_content_image_deletion($post_ID);
         wp_die(__('Main You cannot delete this image because it is being used as a in an article.', 'virtasant-safe-media'));
 
     }
@@ -177,6 +177,43 @@ class Virtasant_Safe_Media_Admin
                 }
             }
             wp_die(__('This image cannot be deleted because it is being used as a featured image. ' .$comma_separated , 'virtasant-safe-media' ));
+        }
+    }
+
+    /**
+     * Disable media deletion Content Image Check.
+     *
+     * @since    1.0.0
+     * @return  null or error
+     */
+
+    public function vitrasant_prevent_content_image_deletion($post_ID)
+    {
+        $post_url = get_post($post_ID);
+        $url = $post_url->guid;
+
+        $posts = get_posts([
+            'post_type' => 'post',
+            'post_status' => 'publish', //not using 'any' (trash not included)
+            'numberposts' => -1, //All post
+        ]);
+        $post_url = [];
+        foreach ($posts as $post) {
+            $content = $post->post_content;
+            if (strpos($content, $url) !== false) { //PHP 8.0 supported
+                $id = $post->ID;
+                $post_url[$id] = add_query_arg( [
+                    'post' => $id,
+                    'action' => 'edit',
+                ], admin_url( 'post.php' ) );
+            }
+        }
+        $comma_separated = "";
+        if(!empty($post_url)) {
+            foreach ($post_url as $key => $single) {
+                $comma_separated .= "<a href='$single'>$key</a> ";
+            }
+            wp_die(__('You cannot delete this image because it is being used in the content of a post. '.$comma_separated,'virtasant-safe-media'));
         }
     }
 
