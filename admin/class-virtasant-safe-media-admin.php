@@ -147,9 +147,23 @@ This action cannot be undone.
     {
 
 
-        $this->vitrasant_prevent_featured_image_deletion($post_ID);
-        $this->vitrasant_prevent_content_image_deletion($post_ID);
-        $this->vitrasant_prevent_term_image_deletion($post_ID);
+        $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_ID);
+
+        if (!empty($featured_image)) {
+            wp_die(__('This image cannot be deleted because it is being used as a featured image. {id} ' . $featured_image, 'virtasant-safe-media'));
+        }
+        $content_image = $this->vitrasant_prevent_content_image_deletion($post_ID);
+
+        if (!empty($content_image)) {
+            wp_die(__('You cannot delete this image because it is being used in the content of a post. {id} ' . $content_image, 'virtasant-safe-media'));
+        }
+
+        $term_image = $this->vitrasant_prevent_term_image_deletion($post_ID);
+
+        if (!empty($term_image)) {
+            wp_die(__('You cannot delete this image because it is being used in the Term Edit Page.  {id} ' . $term_image, 'virtasant-safe-media'));
+        }
+
 
         wp_die(__('Main You cannot delete this image because it is being used as a in an article.', 'virtasant-safe-media'));
 
@@ -162,8 +176,9 @@ This action cannot be undone.
      * @return  null or error
      * @since    1.0.0
      */
-    public function vitrasant_prevent_featured_image_deletion($post_ID)
+    public function vitrasant_prevent_featured_image_deletion($post_ID, $ajax_res = 0)
     {
+
         $featured_image_query = new WP_Query(array(
             'post_type' => 'post',
             'meta_key' => '_thumbnail_id',
@@ -174,18 +189,26 @@ This action cannot be undone.
             while ($featured_image_query->have_posts()) {
                 $featured_image_query->the_post();
                 $id = get_the_ID();
-                $post_url[$id] = add_query_arg([
-                    'post' => $id,
-                    'action' => 'edit',
-                ], admin_url('post.php'));
-            }
-            $comma_separated = "";
-            if (!empty($post_url)) {
-                foreach ($post_url as $key => $single) {
-                    $comma_separated .= "<a href='$single'>$key</a> ";
+                if ($ajax_res == 1) {
+                    $post_url[] = $id;
+                } else {
+                    $post_url[$id] = add_query_arg([
+                        'post' => $id,
+                        'action' => 'edit',
+                    ], admin_url('post.php'));
                 }
             }
-            wp_die(__('This image cannot be deleted because it is being used as a featured image. ' . $comma_separated, 'virtasant-safe-media'));
+            $comma_separated = [];
+            if (!empty($post_url)) {
+                foreach ($post_url as $key => $single) {
+                    $comma_separated[] = "<a href='$single'>$key</a>";
+                }
+            }
+            if ($ajax_res == 1) {
+                return $post_url;
+            } else {
+                return implode(',', $comma_separated);
+            }
         }
     }
 
@@ -196,7 +219,7 @@ This action cannot be undone.
      * @since    1.0.0
      */
 
-    public function vitrasant_prevent_content_image_deletion($post_ID)
+    public function vitrasant_prevent_content_image_deletion($post_ID, $ajax_res = 0)
     {
         $post_url = get_post($post_ID);
         $url = $post_url->guid;
@@ -211,19 +234,26 @@ This action cannot be undone.
             $content = $post->post_content;
             if (strpos($content, $url) !== false) { //PHP 8.0 supported
                 $id = $post->ID;
-                $post_url[$id] = add_query_arg([
-                    'post' => $id,
-                    'action' => 'edit',
-                ], admin_url('post.php'));
+                if ($ajax_res == 1) {
+                    $post_url[] = $id;
+                } else {
+                    $post_url[$id] = add_query_arg([
+                        'post' => $id,
+                        'action' => 'edit',
+                    ], admin_url('post.php'));
+                }
             }
         }
-        $comma_separated = "";
+        $comma_separated = [];
         if (!empty($post_url)) {
             foreach ($post_url as $key => $single) {
-                $comma_separated .= "<a href='$single'>$key</a> ";
+                $comma_separated[] = "<a href='$single'>$key</a>";
             }
-
-            wp_die(__('You cannot delete this image because it is being used in the content of a post. ' . $comma_separated, 'virtasant-safe-media'));
+            if ($ajax_res == 1) {
+                return $post_url;
+            } else {
+                return implode(',', $comma_separated);
+            }
         }
     }
 
@@ -234,9 +264,8 @@ This action cannot be undone.
      * @since    1.0.0
      */
 
-    public function vitrasant_prevent_term_image_deletion($post_ID)
+    public function vitrasant_prevent_term_image_deletion($post_ID, $ajax_res = 0)
     {
-
         $args = array(
             'taxonomy' => 'category',
             'hide_empty' => false,
@@ -246,22 +275,23 @@ This action cannot be undone.
         $terms = get_terms($args);
         foreach ($terms as $term) {
             $id = $term->term_id;
-            $post_url[$id] = get_edit_term_link($id);
+            if ($ajax_res == 1) {
+                $post_url[] = $id;
+            } else {
+                $post_url[$id] = get_edit_term_link($id);
+            }
         }
-        $comma_separated = "";
+        $comma_separated = [];
         if (!empty($post_url)) {
             foreach ($post_url as $key => $single) {
-                $comma_separated .= "<a href='$single'>$key</a> ";
+                $comma_separated[] = "<a href='$single'>$key</a>";
             }
-            $error_message = __('You cannot delete this image because it is being used in the Term Edit Page. ' . $comma_separated, 'virtasant-safe-media');
 
-
-            if (!function_exists('is_ajax') || !is_ajax()) {
-                echo $error_message;
+            if ($ajax_res == 1) {
+                return $post_url;
             } else {
-                wp_die($error_message);
+                return implode(',', $comma_separated);
             }
-
         }
     }
 
@@ -280,7 +310,6 @@ This action cannot be undone.
         unset($columns['comments']);
         unset($columns['parent']);
         unset($columns['date']);
-
 
         $columns['cb'] = __('cb', 'text-domain');
         $columns['title'] = __('Title', 'text-domain');
@@ -304,9 +333,10 @@ This action cannot be undone.
     public function vitrasant_custom_media_columns_content($column_name, $attachment_id)
     {
         if ('attached_objects' == $column_name) {
-            print_r($attachment_id);
-            $attached_objects = get_attached_media('image', $attachment_id);
-            echo count($attached_objects);
+
+            $post_id = $attachment_id;
+            $result = $this->virtasant_linked_articles($post_id);
+            echo implode(', ', $result);
         }
     }
 
@@ -318,6 +348,10 @@ This action cannot be undone.
      * Override the "Attachments Details Two Column" Backbone micro template in WordPress 4.0
      *
      * @see https://stackoverflow.com/a/25948448/2078474
+     *
+     *
+     * @return  null or error
+     * @since    1.0.0
      */
 
 
@@ -559,17 +593,84 @@ This action cannot be undone.
         <?php
     }
 
+    /**
+     * Add media columns Content.
+     *
+     * @return  $form_fields
+     * @since    1.0.0
+     */
+    public function vitrasant_add_custom_attachment_action_field($form_fields, $post)
+    {
+        $post_id = $post->ID;
+        $result = $this->virtasant_linked_articles($post_id);
 
+        $form_fields['my_field'] = [
+            'label' => __('Linked Articles', 'virtasant-safe-media'),
+            'input' => 'html',
+            'html' => ' <label><span>' . implode(', ', $result) . '</span></label>',
+        ];
+
+        return $form_fields;
+    }
+
+    /**
+     * Add media columns Content.
+     *
+     * @return  ajax handler
+     * @since    1.0.0
+     */
     public function vitrasant_delete_handler()
     {
         $post_id = $_POST['post_id'];
-
-        // Do something with the post ID
-        $result = "Post ID $post_id processed.";
-
-        echo $result;
-
+        $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_id, 1);
+        $f_images = "";
+        if (!empty($featured_image)) {
+            $f_images = implode(',', $featured_image);
+            $result = __('This image cannot be deleted because it is being used as a featured image. {id} ' . $f_images, 'virtasant-safe-media');
+            echo $result;
+            wp_die();
+        }
+        $content_image = $this->vitrasant_prevent_content_image_deletion($post_id, 1);
+        $c_images = "";
+        if (!empty($content_image)) {
+            $c_images = implode(',', $content_image);
+            $result = __('You cannot delete this image because it is being used in the content of a post. {id} ' . $c_images, 'virtasant-safe-media');
+            echo $result;
+            wp_die();
+        }
+        $term_image = $this->vitrasant_prevent_term_image_deletion($post_id, 1);
+        $t_images = "";
+        if (!empty($term_image)) {
+            $t_images = implode(',', $term_image);
+            $result = __('You cannot delete this image because it is being used in the Term Edit Page. {id} ' . $t_images, 'virtasant-safe-media');
+            echo $result;
+            wp_die();
+        }
         wp_die();
+    }
+
+    /**
+     * @param mixed $post_id
+     * @return array
+     */
+    public function virtasant_linked_articles(mixed $post_id): array
+    {
+        $final_array = [];
+        $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_id, 0);
+        $final_array[] = $featured_image;
+        $content_image = $this->vitrasant_prevent_content_image_deletion($post_id, 0);
+        $final_array[] = $content_image;
+        $term_image = $this->vitrasant_prevent_term_image_deletion($post_id, 0);
+        $final_array[] = $term_image;
+        $remove_empty = array_filter($final_array);
+        $comma_sep = implode(',', $remove_empty);
+        $merge_all = explode(",", $comma_sep);
+        $result = [];
+        foreach ($merge_all as $key => $value) {
+            if (!in_array($value, $result))
+                $result[$key] = $value;
+        }
+        return $result;
     }
 
 
