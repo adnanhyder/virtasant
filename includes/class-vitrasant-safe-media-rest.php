@@ -59,7 +59,7 @@ class Virtasant_Safe_Media_Posts_Controller
         $imageID = $sting_to_array->id;
 
         $data_array = $imageID;
-        
+
         $response = [];
         $response['code'] = 200;
         $response['data'] = $data_array;

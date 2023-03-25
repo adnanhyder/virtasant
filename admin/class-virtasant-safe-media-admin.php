@@ -255,7 +255,50 @@ class Virtasant_Safe_Media_Admin
             } else {
                 wp_die($error_message);
             }
-           
+
+        }
+    }
+
+    /**
+     * Add media columns.
+     *
+     * @return  null or error
+     * @since    1.0.0
+     */
+    public function vitrasant_custom_media_columns( $columns ) {
+
+        unset( $columns['cb'] );
+        unset( $columns['title'] );
+        unset( $columns['author'] );
+        unset( $columns['comments'] );
+        unset( $columns['parent'] );
+        unset( $columns['date'] );
+
+
+        $columns['cb'] = __( 'cb', 'text-domain' );
+        $columns['title'] = __( 'Title', 'text-domain' );
+        $columns['author'] = __( 'Author', 'text-domain' );
+        $columns['parent'] = __( 'Uploaded To', 'text-domain' );
+        $columns['comments'] = __( '<i class="fa comment-grey-bubble" aria-hidden="true"></i>', 'text-domain' );
+        $columns['attached_objects'] = __( 'Attached Objects', 'text-domain' );
+        $columns['date'] = __( 'Date', 'text-domain' );
+        return $columns;
+
+
+    }
+
+
+    /**
+     * Add media columns Content.
+     *
+     * @return  null or error
+     * @since    1.0.0
+     */
+    public function vitrasant_custom_media_columns_content( $column_name, $attachment_id ) {
+        if ( 'attached_objects' == $column_name ) {
+            print_r($attachment_id);
+            $attached_objects = get_attached_media( 'image', $attachment_id );
+            echo count( $attached_objects );
         }
     }
 

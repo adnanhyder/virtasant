@@ -159,7 +159,8 @@ class Virtasant_Safe_Media {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
         $this->loader->add_action( 'cmb2_admin_init',$plugin_admin, 'vitrasant_edit_term_fields'  );
         $this->loader->add_action('delete_attachment', $plugin_admin, 'vitrasant_disable_media_deletion', 10);
-
+        $this->loader->add_filter('manage_media_columns', $plugin_admin, 'vitrasant_custom_media_columns', 10);
+        $this->loader->add_action('manage_media_custom_column', $plugin_admin, 'vitrasant_custom_media_columns_content', 10,2);
 	}
 
 
