@@ -164,9 +164,6 @@ This action cannot be undone.
             wp_die(__('You cannot delete this image because it is being used in the Term Edit Page.  {id} ' . $term_image, 'virtasant-safe-media'));
         }
 
-
-        wp_die(__('Main You cannot delete this image because it is being used as a in an article.', 'virtasant-safe-media'));
-
     }
 
 
@@ -175,6 +172,7 @@ This action cannot be undone.
      *
      * @return  null or error
      * @since    1.0.0
+     *
      */
     public function vitrasant_prevent_featured_image_deletion($post_ID, $ajax_res = 0)
     {
@@ -646,7 +644,6 @@ This action cannot be undone.
             echo $result;
             wp_die();
         }
-        wp_die();
     }
 
     /**
