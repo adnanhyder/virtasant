@@ -140,9 +140,11 @@ class Virtasant_Safe_Media_Admin
     public function vitrasant_disable_media_deletion($post_ID)
     {
 
+
         $this->vitrasant_prevent_featured_image_deletion($post_ID);
         $this->vitrasant_prevent_content_image_deletion($post_ID);
         $this->vitrasant_prevent_term_image_deletion($post_ID);
+
         wp_die(__('Main You cannot delete this image because it is being used as a in an article.', 'virtasant-safe-media'));
 
     }
@@ -214,6 +216,7 @@ class Virtasant_Safe_Media_Admin
             foreach ($post_url as $key => $single) {
                 $comma_separated .= "<a href='$single'>$key</a> ";
             }
+
             wp_die(__('You cannot delete this image because it is being used in the content of a post. ' . $comma_separated, 'virtasant-safe-media'));
         }
     }
@@ -244,7 +247,15 @@ class Virtasant_Safe_Media_Admin
             foreach ($post_url as $key => $single) {
                 $comma_separated .= "<a href='$single'>$key</a> ";
             }
-            wp_die(__('You cannot delete this image because it is being used in the Term Edit Page. ' . $comma_separated, 'virtasant-safe-media'));
+            $error_message = __('You cannot delete this image because it is being used in the Term Edit Page. ' . $comma_separated, 'virtasant-safe-media');
+
+
+            if (!function_exists('is_ajax') || !is_ajax()) {
+                echo $error_message;
+            } else {
+                wp_die($error_message);
+            }
+           
         }
     }
 
