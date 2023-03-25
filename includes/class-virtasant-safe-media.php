@@ -151,19 +151,36 @@ class Virtasant_Safe_Media {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_admin_hooks()
+    {
 
-		$plugin_admin = new Virtasant_Safe_Media_Admin( $this->get_plugin_name(), $this->get_version() );
+        $plugin_admin = new Virtasant_Safe_Media_Admin($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-        $this->loader->add_action( 'cmb2_admin_init',$plugin_admin, 'vitrasant_edit_term_fields'  );
+        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
+        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
+        $this->loader->add_action('cmb2_admin_init', $plugin_admin, 'vitrasant_edit_term_fields');
         $this->loader->add_action('delete_attachment', $plugin_admin, 'vitrasant_disable_media_deletion', 10);
         $this->loader->add_filter('manage_media_columns', $plugin_admin, 'vitrasant_custom_media_columns', 10);
-        $this->loader->add_action('manage_media_custom_column', $plugin_admin, 'vitrasant_custom_media_columns_content', 10,2);
-	}
+        $this->loader->add_action('manage_media_custom_column', $plugin_admin, 'vitrasant_custom_media_columns_content', 10, 2);
+        $this->loader->add_action( 'admin_footer-upload.php',$plugin_admin ,'vitrasant_modified_attachments_details_two_column_template' );
+        $this->loader->add_action( 'wp_ajax_vitrasant_delete',$plugin_admin, 'vitrasant_delete_handler' );
 
 
+
+        function add_custom_attachment_action_field($form_fields, $post) {
+
+            $form_fields['my_field'] = [
+                'label' => __('Linked Articles', 'virtasant-safe-media'),
+                'input' => 'html',
+                'html' => ' <label><span>a</span></label>',
+            ];
+
+            return $form_fields;
+        }
+      add_filter('attachment_fields_to_edit', 'add_custom_attachment_action_field', 10, 2);
+
+
+    }
 
 
 	/**

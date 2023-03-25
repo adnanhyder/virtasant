@@ -2,3 +2,8 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+.media-types.media-types-required-info {
+    display: none;
+}
+
