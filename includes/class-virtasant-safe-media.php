@@ -166,7 +166,6 @@ class Virtasant_Safe_Media
         $this->loader->add_action('delete_attachment', $plugin_admin, 'vitrasant_disable_media_deletion', 10);
         $this->loader->add_filter('manage_media_columns', $plugin_admin, 'vitrasant_custom_media_columns', 10);
         $this->loader->add_action('manage_media_custom_column', $plugin_admin, 'vitrasant_custom_media_columns_content', 10, 2);
-        $this->loader->add_action('admin_footer-upload.php', $plugin_admin, 'vitrasant_modified_attachments_details_two_column_template');
         $this->loader->add_action('wp_ajax_vitrasant_delete', $plugin_admin, 'vitrasant_delete_handler');
         $this->loader->add_filter('attachment_fields_to_edit', $plugin_admin, 'vitrasant_add_custom_attachment_action_field', 10, 2);
 
