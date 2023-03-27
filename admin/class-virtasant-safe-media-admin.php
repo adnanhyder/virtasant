@@ -140,9 +140,7 @@ class Virtasant_Safe_Media_Admin
     public function vitrasant_disable_media_deletion($post_ID)
     {
 
-
         $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_ID);
-
         if (!empty($featured_image)) {
             wp_die(__('This image cannot be deleted because it is being used as a featured image. {id} ' . $featured_image, 'virtasant-safe-media'));
         }
@@ -351,8 +349,6 @@ class Virtasant_Safe_Media_Admin
             'label' => __('Linked Articles', 'virtasant-safe-media'),
             'input' => 'html',
             'html' => ' <label><span>' . implode(', ', $result) . '</span></label>',
-
-
         ];
 
         return $form_fields;
@@ -403,6 +399,7 @@ class Virtasant_Safe_Media_Admin
     /**
      * @param mixed $post_id
      * @return array
+     * @since    1.0.0
      */
     public function virtasant_linked_articles(mixed $post_id): array
     {
