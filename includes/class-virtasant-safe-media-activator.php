@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Fired during plugin activation
  *
@@ -30,11 +29,10 @@ class Virtasant_Safe_Media_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-        /*
-         *
-         * No database created so not using activation hook
-         *
-         * */
+		/**
+		 *
+		 * No database created so not using activation hook
+		 */
 	}
 
 }

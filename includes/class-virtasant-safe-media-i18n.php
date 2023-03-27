@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Define the internationalization functionality
  *
@@ -24,7 +23,7 @@
  * @subpackage Virtasant_Safe_Media/includes
  * @author     Adnan <12345adnan@gmail.com>
  */
-class Virtasant_Safe_Media_i18n {
+class Virtasant_Safe_Media_I18n {
 
 
 	/**

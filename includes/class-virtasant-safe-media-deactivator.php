@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Fired during plugin deactivation
  *
@@ -30,11 +29,10 @@ class Virtasant_Safe_Media_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-        /*
-         *
-         * No database created so not using deactivation hook
-         *
-         * */
+		/**
+		 *
+		 * No database created so not using deactivation hook
+		 */
 	}
 
 }

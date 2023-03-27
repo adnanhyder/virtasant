@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The plugin bootstrap file
  *
@@ -59,11 +58,11 @@ register_activation_hook( __FILE__, 'activate_virtasant_safe_media' );
 register_deactivation_hook( __FILE__, 'deactivate_virtasant_safe_media' );
 
 
-/*
+/**
  * The library CMB2 activation, including in Plugin,
- * */
+ */
 
-require_once  plugin_dir_path( __FILE__ ) . '/includes/cmb2/init.php';
+require_once plugin_dir_path( __FILE__ ) . '/includes/cmb2/init.php';
 
 /**
  * The core plugin class that is used to define internationalization,
