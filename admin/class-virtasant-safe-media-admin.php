@@ -379,11 +379,11 @@ class Virtasant_Safe_Media_Admin
     }
 
     /**
-     * @param mixed $post_id
+     * @param  $post_id
      * @return array
      * @since    1.0.0
      */
-    public function virtasant_linked_articles(mixed $post_id): array
+    public function virtasant_linked_articles($post_id)
     {
         $final_array = [];
         $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_id, 0);
