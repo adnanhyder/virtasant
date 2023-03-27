@@ -4,13 +4,14 @@
     $(document).on("click", ".delete-attachment", function (e) {
         e.preventDefault();
 
-        let attachment_url = $(this).parent().parent().find("#attachment-details-two-column-copy-link").val();
+        let post_id = $(this).parent().parent().parent().parent().find(".compat-field-id th label").attr("for").replace(/[^0-9]/g, '');
+
         $.ajax({
             type: 'POST',
             url: ajaxurl,
             data: {
                 action: 'vitrasant_delete',
-                post_url: attachment_url
+                post_id: post_id
             },
             success: function (response) {
                 if (response.code == 1) {

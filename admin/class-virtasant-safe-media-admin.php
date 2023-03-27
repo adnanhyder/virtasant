@@ -48,11 +48,15 @@ class Virtasant_Safe_Media_Admin
      * @param string $version The version of this plugin.
      * @since    1.0.0
      */
+
+    private $error_message;
+
     public function __construct($plugin_name, $version)
     {
 
         $this->plugin_name = $plugin_name;
         $this->version = $version;
+        $this->error_message = __("Deletion Failed because Image is linked to post(s) or term(s) remove the image from the post(s) or term(s) where it is being used to continue delete. ", 'virtasant-safe-media');
 
     }
 
@@ -140,21 +144,11 @@ class Virtasant_Safe_Media_Admin
     public function vitrasant_disable_media_deletion($post_ID)
     {
 
-        $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_ID);
-        if (!empty($featured_image)) {
-            wp_die(__('This image cannot be deleted because it is being used as a featured image. {id} ' . $featured_image, 'virtasant-safe-media'));
-        }
-        $content_image = $this->vitrasant_prevent_content_image_deletion($post_ID);
-
-        if (!empty($content_image)) {
-            wp_die(__('You cannot delete this image because it is being used in the content of a post. {id} ' . $content_image, 'virtasant-safe-media'));
+        $msg = $this->vitrasant_get_response_message($post_ID, 0);
+        if (!empty($msg)) {
+            wp_die($this->error_message . $msg);
         }
 
-        $term_image = $this->vitrasant_prevent_term_image_deletion($post_ID);
-
-        if (!empty($term_image)) {
-            wp_die(__('You cannot delete this image because it is being used in the Term Edit Page.  {id} ' . $term_image, 'virtasant-safe-media'));
-        }
 
     }
 
@@ -168,7 +162,6 @@ class Virtasant_Safe_Media_Admin
      */
     public function vitrasant_prevent_featured_image_deletion($post_ID, $ajax_res = 0)
     {
-
         $featured_image_query = new WP_Query(array(
             'post_type' => 'post',
             'meta_key' => '_thumbnail_id',
@@ -345,11 +338,12 @@ class Virtasant_Safe_Media_Admin
         $post_id = $post->ID;
         $result = $this->virtasant_linked_articles($post_id);
 
-        $form_fields['article_field'] = [
+        $form_fields['id'] = [
             'label' => __('Linked Articles', 'virtasant-safe-media'),
             'input' => 'html',
             'html' => ' <label><span>' . implode(', ', $result) . '</span></label>',
         ];
+
 
         return $form_fields;
     }
@@ -362,37 +356,18 @@ class Virtasant_Safe_Media_Admin
      */
     public function vitrasant_delete_handler()
     {
-        $post_id = attachment_url_to_postid( $_POST['post_url'] );
-        $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_id, 1);
-        $f_images = "";
-        if (!empty($featured_image)) {
-            $f_images = implode(',', $featured_image);
+        $post_ID = intval($_POST['post_id']);
+
+        $msg = $this->vitrasant_get_response_message($post_ID, 1);
+
+        if (!empty($msg)) {
             $result = [
                 "code" => 0,
-                "msg" => __('This image cannot be deleted because it is being used as a featured image. {id} ' . $f_images, 'virtasant-safe-media')
+                "msg" => $this->error_message . $msg,
             ];
             wp_send_json($result);
         }
-        $content_image = $this->vitrasant_prevent_content_image_deletion($post_id, 1);
-        $c_images = "";
-        if (!empty($content_image)) {
-            $c_images = implode(',', $content_image);
-            $result = [
-                "code" => 0,
-                "msg" => __('You cannot delete this image because it is being used in the content of a post. {id} ' . $c_images, 'virtasant-safe-media')
-            ];
-            wp_send_json($result);
-        }
-        $term_image = $this->vitrasant_prevent_term_image_deletion($post_id, 1);
-        $t_images = "";
-        if (!empty($term_image)) {
-            $t_images = implode(',', $term_image);
-            $result = [
-                "code" => 0,
-                "msg" => __('You cannot delete this image because it is being used in the Term Edit Page. {id} ' . $t_images, 'virtasant-safe-media')
-            ];
-            wp_send_json($result);
-        }
+
 
     }
 
@@ -421,7 +396,39 @@ class Virtasant_Safe_Media_Admin
         return $result;
     }
 
+    /**
+     * @param $post_ID
+     * @return string
+     */
+    public function vitrasant_get_response_message($post_ID, $ajax_res = 0)
+    {
+        $msg = "";
+        $featured_image = $this->vitrasant_prevent_featured_image_deletion($post_ID, $ajax_res);
+        if (!empty($featured_image)) {
+            if ($ajax_res == 1) {
+                $featured_image = implode(',', $featured_image);
+            }
+            $msg .= __('It is being used as a featured image. {id} ' . $featured_image . " ", 'virtasant-safe-media');
+        }
+        $content_image = $this->vitrasant_prevent_content_image_deletion($post_ID, $ajax_res);
 
+        if (!empty($content_image)) {
+            if ($ajax_res == 1) {
+                $content_image = implode(',', $content_image);
+            }
+            $msg .= __('It is being used in the content of a post. {id} ' . $content_image . " ", 'virtasant-safe-media');
+        }
+
+        $term_image = $this->vitrasant_prevent_term_image_deletion($post_ID, $ajax_res);
+
+        if (!empty($term_image)) {
+            if ($ajax_res == 1) {
+                $term_image = implode(',', $term_image);
+            }
+            $msg .= __('It is being used in the Term Edit Page.  {id} ' . $term_image . " ", 'virtasant-safe-media');
+        }
+        return $msg;
+    }
 
 
 }

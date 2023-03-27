@@ -53,6 +53,7 @@ class Virtasant_Safe_Media_Posts_Controller
             [
                 'methods' => 'Post',
                 'callback' => [$this, 'getImage'],
+                'permission_callback' => '__return_true',
             ],
         ]);
         //delete image rest method
@@ -61,6 +62,7 @@ class Virtasant_Safe_Media_Posts_Controller
             [
                 'methods' => 'Delete',
                 'callback' => [$this, 'deleteImage'],
+                'permission_callback' => '__return_true',
             ],
         ]);
 
@@ -152,7 +154,7 @@ class Virtasant_Safe_Media_Posts_Controller
             }
             if (!empty($msg)) {
                 $data_array = [
-                    'msg' => __("Deletion Failed because Image is linked to " . $msg, "virtasant-safe-media"),
+                    'msg' => __("Deletion Failed because Image is linked to post(s) or term(s)" . $msg, "virtasant-safe-media"),
                 ];
             } else {
 
