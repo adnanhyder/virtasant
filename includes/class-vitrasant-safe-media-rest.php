@@ -80,43 +80,49 @@ class Virtasant_Safe_Media_Posts_Controller
         $request_body = $request->get_body();
         $sting_to_array = json_decode($request_body);
         $imageID = intval($sting_to_array->post_id);
-        $post_info = get_post($imageID);
-        $post_meta_info = wp_get_attachment_metadata($imageID);
-        $image_alt = get_post_meta($imageID, '_wp_attachment_image_alt', true);
-        $featured = $this->safe_media->vitrasant_prevent_featured_image_deletion($imageID, 1);
-        $content = $this->safe_media->vitrasant_prevent_content_image_deletion($imageID, 1);
+        $is_attachment = wp_get_attachment_image_src($imageID);
+        if (!empty($is_attachment)) {
+            $post_info = get_post($imageID);
+            $post_meta_info = wp_get_attachment_metadata($imageID);
+            $image_alt = get_post_meta($imageID, '_wp_attachment_image_alt', true);
+            $featured = $this->safe_media->vitrasant_prevent_featured_image_deletion($imageID, 1);
+            $content = $this->safe_media->vitrasant_prevent_content_image_deletion($imageID, 1);
+            $term = $this->safe_media->vitrasant_prevent_term_image_deletion($imageID, 1);
 
-        $term = $this->safe_media->vitrasant_prevent_term_image_deletion($imageID, 1);
-
-        if (empty($featured)) {
-            $featured = [];
-        }
-        if (empty($content)) {
-            $content = [];
-        }
-        if (empty($term)) {
-            $term = [];
-        }
-        $data_array = [
-            'id' => $post_info->ID,
-            'date' => $post_info->post_date,
-            'date_gmt' => $post_info->post_date_gmt,
-            'slug' => $post_info->guid,
-            'type' => $post_info->post_mime_type,
-            'link' => $post_info->guid,
-            'alt_text' => $image_alt,
-            'attached_objects' => [
-                'post' => [
-                    'featured' => implode(',', $featured),
-                    'content' => implode(',', $content)
+            if (empty($featured)) {
+                $featured = [];
+            }
+            if (empty($content)) {
+                $content = [];
+            }
+            if (empty($term)) {
+                $term = [];
+            }
+            $data_array = [
+                'id' => $post_info->ID,
+                'date' => $post_info->post_date,
+                'date_gmt' => $post_info->post_date_gmt,
+                'slug' => $post_info->guid,
+                'type' => $post_info->post_mime_type,
+                'link' => $post_info->guid,
+                'alt_text' => $image_alt,
+                'attached_objects' => [
+                    'post' => [
+                        'featured' => implode(',', $featured),
+                        'content' => implode(',', $content)
+                    ],
+                    'term' => implode(',', $term),
                 ],
-                'term' => implode(',', $term),
-            ],
-            'meta_data' => [
-                'meta_obj' => $post_meta_info,
-                'post_obj' => $post_info,
-            ]
-        ];
+                'meta_data' => [
+                    'meta_obj' => $post_meta_info,
+                    'post_obj' => $post_info,
+                ]
+            ];
+        } else {
+            $data_array = [
+                "msg" => null
+            ];
+        }
 
         $response['code'] = 200;
         $response['data'] = $data_array;
@@ -134,34 +140,20 @@ class Virtasant_Safe_Media_Posts_Controller
         $request_body = $request->get_body();
         $sting_to_array = json_decode($request_body);
         $imageID = intval($sting_to_array->post_id);
-        $post_info = get_post($imageID);
+        $is_attachment = wp_get_attachment_image_src($imageID);
         $data_array = [
             "msg" => null
         ];
-        if (!empty($post_info)) {
-            $featured = $this->safe_media->vitrasant_prevent_featured_image_deletion($imageID, 1);
-            $content = $this->safe_media->vitrasant_prevent_content_image_deletion($imageID, 1);
-            $term = $this->safe_media->vitrasant_prevent_term_image_deletion($imageID, 1);
-            $msg = "";
-            if (!empty($featured)) {
-                $msg .= __("Featured image {id} ", "virtasant-safe-media") . implode(',', $featured) . " ";
-            }
-            if (!empty($content)) {
-                $msg .= __("Post content image {id} ", "virtasant-safe-media") . implode(',', $content) . " ";
-            }
-            if (!empty($term)) {
-                $msg .= __("Term image {id} ", "virtasant-safe-media") . implode(',', $term);
-            }
+        if (!empty($is_attachment)) {
+            $msg = $this->safe_media->vitrasant_get_response_message($imageID, 1);
             if (!empty($msg)) {
                 $data_array = [
-                    'msg' => __("Deletion Failed because Image is linked to post(s) or term(s)" . $msg, "virtasant-safe-media"),
+                    'msg' => $this->safe_media->error_message . $msg,
                 ];
             } else {
-
-                $obj = wp_delete_attachment( $imageID , true );
-
+                $obj = wp_delete_attachment($imageID, true);
                 $data_array = [
-                    'msg' => __("Deletion Success {id} ". $imageID , "virtasant-safe-media"),
+                    'msg' => __("Deletion Success {id} " . $imageID, "virtasant-safe-media"),
                     'deleted_obj' => $obj,
                 ];
             }

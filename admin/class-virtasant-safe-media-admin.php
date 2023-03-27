@@ -41,6 +41,16 @@ class Virtasant_Safe_Media_Admin
      */
     private $version;
 
+
+    /**
+     * The version of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string $error_message The default error of images.
+     */
+    public $error_message;
+
     /**
      * Initialize the class and set its properties.
      *
@@ -48,9 +58,6 @@ class Virtasant_Safe_Media_Admin
      * @param string $version The version of this plugin.
      * @since    1.0.0
      */
-
-    private $error_message;
-
     public function __construct($plugin_name, $version)
     {
 
@@ -215,7 +222,7 @@ class Virtasant_Safe_Media_Admin
             $post_url = [];
             foreach ($posts as $post) {
                 $content = $post->post_content;
-                if (strpos($content, $url) !== false) { //PHP 8.0 supported
+                if (strpos($content, $url) !== false) { //Below PHP 8.0 supported
                     $id = $post->ID;
                     if ($ajax_res == 1) {
                         $post_url[] = $id;
@@ -425,7 +432,7 @@ class Virtasant_Safe_Media_Admin
             if ($ajax_res == 1) {
                 $term_image = implode(',', $term_image);
             }
-            $msg .= __('It is being used in the Term Edit Page.  {id} ' . $term_image . " ", 'virtasant-safe-media');
+            $msg .= __('It is being used in the Term Edit Page. {id} ' . $term_image . " ", 'virtasant-safe-media');
         }
         return $msg;
     }
