@@ -29,3 +29,10 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+/*
+ *
+ * No database created so not using deactivation hook
+ *
+ * */
+
