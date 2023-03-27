@@ -23,26 +23,33 @@
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Virtasant_Safe_Media
+ * @package    Virtasant_Safe_Media_Rest
  * @subpackage Virtasant_Safe_Media/includes
  * @author     Adnan <12345adnan@gmail.com>
  */
+
+
 class Virtasant_Safe_Media_Posts_Controller
 {
+
+    private  $safe_media;
     // Here initialize our namespace
     public function __construct()
     {
 
         add_action('rest_api_init', [$this, "prefix_register_vitrasant_rest_routes"]);
         $this->namespace = 'assignment/v1';
-
+        $params = new Virtasant_Safe_Media();
+        $safe_media = new Virtasant_Safe_Media_Admin($params->get_plugin_name(),$params->get_version());
+        $this->safe_media = $safe_media;
     }
+
 
     // Register our routes.
     public function register_routes()
     {
 
-        register_rest_route($this->namespace,  '/getImage', [
+        register_rest_route($this->namespace, '/getImage', [
             // Notice how we are registering multiple endpoints the 'schema' equates to an OPTIONS request.
             [
                 'methods' => 'Post',
@@ -54,13 +61,48 @@ class Virtasant_Safe_Media_Posts_Controller
 
     public function getImage($request)
     {
+
         $request_body = $request->get_body();
         $sting_to_array = json_decode($request_body);
-        $imageID = $sting_to_array->id;
+        $imageID = $sting_to_array->post_id;
+        $post_info = get_post($imageID);
+        $post_meta_info = wp_get_attachment_metadata($imageID);
+        $image_alt = get_post_meta($imageID, '_wp_attachment_image_alt', true);
+        $featured = $this->safe_media->vitrasant_prevent_featured_image_deletion($imageID, 1);
+        $content = $this->safe_media->vitrasant_prevent_content_image_deletion($imageID, 1);
 
-        $data_array = $imageID;
+        $term = $this->safe_media->vitrasant_prevent_term_image_deletion($imageID, 1);
 
-        $response = [];
+        if(empty($featured)){
+            $featured = [];
+        }
+        if(empty($content)){
+            $content = [];
+        }
+        if(empty($term)){
+            $term = [];
+        }
+        $data_array = [
+            'id' => $post_info->ID,
+            'date' => $post_info->post_date,
+            'date_gmt' => $post_info->post_date_gmt,
+            'slug' => $post_info->guid,
+            'type' => $post_info->post_mime_type,
+            'link' => $post_info->guid,
+            'alt_text' => $image_alt,
+            'attached_objects' => [
+               'post' => [
+                   'featured' => implode(',',$featured),
+                   'content' => implode(',',$content)
+               ],
+               'term' => implode(',',$term),
+            ],
+            'meta_data' => [
+                'meta_obj' => $post_meta_info,
+                'post_obj' => $post_info,
+            ]
+        ];
+
         $response['code'] = 200;
         $response['data'] = $data_array;
         return $response;

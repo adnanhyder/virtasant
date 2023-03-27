@@ -99,13 +99,7 @@ class Virtasant_Safe_Media_Admin
          * between the defined hooks and the functions defined in this
          * class.
          */
-        wp_register_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/virtasant-safe-media-admin.js');
-        $translation_array = [
-            'confirm_error' => __('You are about to permanently delete these items from your site.
-This action cannot be undone.
-\'Cancel\' to stop, \'OK\' to delete', 'virtasant-safe-media'),
-        ];
-        wp_localize_script($this->plugin_name, 'error_message', $translation_array);
+
         wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/virtasant-safe-media-admin.js', ['jquery'], $this->version, false);
 
     }
@@ -429,6 +423,8 @@ This action cannot be undone.
         }
         return $result;
     }
+
+
 
 
 }
