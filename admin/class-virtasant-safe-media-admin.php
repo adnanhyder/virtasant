@@ -158,7 +158,7 @@ class Virtasant_Safe_Media_Admin {
 	 * Function vitrasant_prevent_featured_image_deletion Disable media deletion hook attached (delete_attachment) .
 	 *
 	 * @param string $post_ID id of the attachment.
-	 * @param int    $ajax_res show where ajax request or not
+	 * @param int    $ajax_res show where ajax request or not.
 	 * @since 1.0.0
 	 */
 	public function vitrasant_prevent_featured_image_deletion( $post_ID, $ajax_res = 0 ) {
@@ -204,7 +204,7 @@ class Virtasant_Safe_Media_Admin {
 	 * Function vitrasant_prevent_content_image_deletion Disable media deletion hook attached (delete_attachment) .
 	 *
 	 * @param string $post_ID id of the attachment.
-	 * @param int    $ajax_res show where ajax request or not
+	 * @param int    $ajax_res show where ajax request or not.
 	 * @since 1.0.0
 	 */
 	public function vitrasant_prevent_content_image_deletion( $post_ID, $ajax_res = 0 ) {
@@ -256,7 +256,7 @@ class Virtasant_Safe_Media_Admin {
 	 * Function vitrasant_prevent_term_image_deletion Disable media deletion hook attached (delete_attachment) .
 	 *
 	 * @param string $post_ID id of the attachment.
-	 * @param int    $ajax_res show where ajax request or not
+	 * @param int    $ajax_res show where ajax request or not.
 	 * @since 1.0.0
 	 */
 	public function vitrasant_prevent_term_image_deletion( $post_ID, $ajax_res = 0 ) {
@@ -290,9 +290,10 @@ class Virtasant_Safe_Media_Admin {
 	}
 
 	/**
-	 * Add media columns.
+	 * Function vitrasant_custom_media_columns Add media columns on libarary page.
 	 *
-	 * @return  null or error
+	 * @param array $columns all the media library columns.
+	 * @return array $columns
 	 * @since    1.0.0
 	 */
 	public function vitrasant_custom_media_columns( $columns ) {
@@ -303,26 +304,28 @@ class Virtasant_Safe_Media_Admin {
 		unset( $columns['parent'] );
 		unset( $columns['date'] );
 
-		$columns['cb']               = __( 'cb', 'text-domain' );
-		$columns['title']            = __( 'Title', 'text-domain' );
-		$columns['author']           = __( 'Author', 'text-domain' );
-		$columns['parent']           = __( 'Uploaded To', 'text-domain' );
-		$columns['comments']         = __( '<i class="fa comment-grey-bubble" aria-hidden="true"></i>', 'text-domain' );
-		$columns['attached_objects'] = __( 'Attached Objects', 'text-domain' );
-		$columns['date']             = __( 'Date', 'text-domain' );
+		$columns['cb']               = __( 'cb', 'virtasant-safe-media' );
+		$columns['title']            = __( 'Title', 'virtasant-safe-media' );
+		$columns['author']           = __( 'Author', 'virtasant-safe-media' );
+		$columns['parent']           = __( 'Uploaded To', 'virtasant-safe-media' );
+		$columns['comments']         = __( '<i class="fa comment-grey-bubble" aria-hidden="true"></i>', 'virtasant-safe-media' );
+		$columns['attached_objects'] = __( 'Attached Objects', 'virtasant-safe-media' );
+		$columns['date']             = __( 'Date', 'virtasant-safe-media' );
 		return $columns;
 
 	}
 
 
 	/**
-	 * Add media columns Content.
+	 * Function vitrasant_custom_media_columns Add media columns.
 	 *
-	 * @return  null or error
+	 * @param array $column_name current column of the media library.
+	 * @param int   $attachment_id of the post.
+	 * @return void $columns
 	 * @since    1.0.0
 	 */
 	public function vitrasant_custom_media_columns_content( $column_name, $attachment_id ) {
-		if ( 'attached_objects' == $column_name ) {
+		if ( 'attached_objects' === $column_name ) {
 
 			$post_id = $attachment_id;
 			$result  = $this->virtasant_linked_articles( $post_id );
@@ -332,9 +335,11 @@ class Virtasant_Safe_Media_Admin {
 
 
 	/**
-	 * Add media columns Content.
+	 * Function vitrasant_add_custom_attachment_action_field Add media columns.
 	 *
-	 * @return  $form_fields
+	 * @param array  $form_fields current form fields column of the media library.
+	 * @param object $post current post.
+	 * @return array $form_fields
 	 * @since    1.0.0
 	 */
 	public function vitrasant_add_custom_attachment_action_field( $form_fields, $post ) {
@@ -357,32 +362,37 @@ class Virtasant_Safe_Media_Admin {
 	 * @since    1.0.0
 	 */
 	public function vitrasant_delete_handler() {
-		$post_ID = intval( $_POST['post_id'] );
+		if ( isset( $_POST['post_id'] ) ) {
 
-		$msg = $this->vitrasant_get_response_message( $post_ID, 1 );
+			$post_ID = intval( $_POST['post_id'] );
 
-		if ( ! empty( $msg ) ) {
-			$result = array(
-				'code' => 0,
-				'msg'  => $this->error_message . $msg,
-			);
-			wp_send_json( $result );
+			$msg = $this->vitrasant_get_response_message( $post_ID, 1 );
+
+			if ( ! empty( $msg ) ) {
+				$result = array(
+					'code' => 0,
+					'msg'  => $this->error_message . $msg,
+				);
+				wp_send_json( $result );
+			}
 		}
 
 	}
 
 	/**
-	 * @param  $post_id
-	 * @return array
-	 * @since    1.0.0
+	 * Function vitrasant_prevent_term_image_deletion Disable media deletion hook attached (delete_attachment) .
+	 *
+	 * @param int $post_ID for fetching post data.
+	 * @return array $result all the ids.
+	 * @since 1.0.0
 	 */
-	public function virtasant_linked_articles( $post_id ) {
+	public function virtasant_linked_articles( $post_ID ) {
 		$final_array    = array();
-		$featured_image = $this->vitrasant_prevent_featured_image_deletion( $post_id, 0 );
+		$featured_image = $this->vitrasant_prevent_featured_image_deletion( $post_ID, 0 );
 		$final_array[]  = $featured_image;
-		$content_image  = $this->vitrasant_prevent_content_image_deletion( $post_id, 0 );
+		$content_image  = $this->vitrasant_prevent_content_image_deletion( $post_ID, 0 );
 		$final_array[]  = $content_image;
-		$term_image     = $this->vitrasant_prevent_term_image_deletion( $post_id, 0 );
+		$term_image     = $this->vitrasant_prevent_term_image_deletion( $post_ID, 0 );
 		$final_array[]  = $term_image;
 		$remove_empty   = array_filter( $final_array );
 		$comma_sep      = implode( ',', $remove_empty );
@@ -400,7 +410,7 @@ class Virtasant_Safe_Media_Admin {
 	 * Function vitrasant_get_response_message Disable media deletion hook attached (delete_attachment) .
 	 *
 	 * @param string $post_ID id of the attachment.
-	 * @param int    $ajax_res show where ajax request or not
+	 * @param int    $ajax_res show where ajax request or not.
 	 * @since 1.0.0
 	 */
 	public function vitrasant_get_response_message( $post_ID, $ajax_res = 0 ) {
@@ -410,7 +420,7 @@ class Virtasant_Safe_Media_Admin {
 			if ( $ajax_res === 1 ) {
 				$featured_image = implode( ',', $featured_image );
 			}
-			$msg .= __( 'It is being used as a featured image. {id} ' . $featured_image . ' ', 'virtasant-safe-media' );
+			$msg .= __( 'It is being used as a featured image. {id}  ', 'virtasant-safe-media' ) . $featured_image . ' ';
 		}
 		$content_image = $this->vitrasant_prevent_content_image_deletion( $post_ID, $ajax_res );
 
@@ -418,7 +428,7 @@ class Virtasant_Safe_Media_Admin {
 			if ( $ajax_res === 1 ) {
 				$content_image = implode( ',', $content_image );
 			}
-			$msg .= __( 'It is being used in the content of a post. {id} ' . $content_image . ' ', 'virtasant-safe-media' );
+			$msg .= __( 'It is being used in the content of a post. {id} ', 'virtasant-safe-media' ) . $content_image . ' ';
 		}
 
 		$term_image = $this->vitrasant_prevent_term_image_deletion( $post_ID, $ajax_res );
@@ -427,7 +437,7 @@ class Virtasant_Safe_Media_Admin {
 			if ( $ajax_res === 1 ) {
 				$term_image = implode( ',', $term_image );
 			}
-			$msg .= __( 'It is being used in the Term Edit Page. {id} ' . $term_image . ' ', 'virtasant-safe-media' );
+			$msg .= __( 'It is being used in the Term Edit Page. {id} ', 'virtasant-safe-media' ) . $term_image . ' ';
 		}
 		return $msg;
 	}
