@@ -48,7 +48,9 @@
 					url: ajaxurl,
 					data: {
 						action: 'vitrasant_delete',
-						post_id: post_id
+						security: ajax_var.nonce,
+						post_id: post_id,
+
 					},
 					success: function (response) {
 						if (response.code == 1) {

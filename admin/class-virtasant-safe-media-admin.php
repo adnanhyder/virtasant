@@ -106,7 +106,14 @@ class Virtasant_Safe_Media_Admin {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/virtasant-safe-media-admin.js', array( 'jquery' ), $this->version, false );
-
+		wp_localize_script(
+			$this->plugin_name,
+			'ajax_var',
+			array(
+				'url'   => admin_url( 'admin-ajax.php' ),
+				'nonce' => wp_create_nonce( 'ajax-nonce' ),
+			)
+		);
 	}
 
 	/**
@@ -147,8 +154,8 @@ class Virtasant_Safe_Media_Admin {
 	public function vitrasant_disable_media_deletion( $post_ID ) {
 		$msg = $this->vitrasant_get_response_message( $post_ID, 0 );
 		if ( ! empty( $msg ) ) {
-			$error_string = $this->error_message . $msg;
-			wp_die( __( $error_string ) ); // __() only to escape security purpose.
+			$error_string = $this->error_message . $msg; // error string already escaped.
+            wp_die($error_string); // phpcs:ignore
 		}
 
 	}
@@ -165,8 +172,8 @@ class Virtasant_Safe_Media_Admin {
 		$featured_image_query = new WP_Query(
 			array(
 				'post_type'  => 'post',
-				'meta_key'   => '_thumbnail_id',
-				'meta_value' => $post_ID,
+				'meta_key'   => '_thumbnail_id', // phpcs:ignore
+				'meta_value' => $post_ID, // phpcs:ignore
 			)
 		);
 		$post_url             = array();
@@ -174,7 +181,7 @@ class Virtasant_Safe_Media_Admin {
 			while ( $featured_image_query->have_posts() ) {
 				$featured_image_query->the_post();
 				$id = get_the_ID();
-				if ( $ajax_res === 1 ) {
+				if ( 1 === $ajax_res ) {
 					$post_url[] = $id;
 				} else {
 					$post_url[ $id ] = add_query_arg(
@@ -189,10 +196,12 @@ class Virtasant_Safe_Media_Admin {
 			$comma_separated = array();
 			if ( ! empty( $post_url ) ) {
 				foreach ( $post_url as $key => $single ) {
+					$single            = esc_url( $single );
+					$key               = esc_html( $key );
 					$comma_separated[] = "<a href='$single'>$key</a>";
 				}
 			}
-			if ( $ajax_res === 1 ) {
+			if ( 1 === $ajax_res ) {
 				return $post_url;
 			} else {
 				return implode( ',', $comma_separated );
@@ -208,9 +217,9 @@ class Virtasant_Safe_Media_Admin {
 	 * @since 1.0.0
 	 */
 	public function vitrasant_prevent_content_image_deletion( $post_ID, $ajax_res = 0 ) {
-		$post_url = get_post( $post_ID );
-		if ( ! empty( $post_url ) ) {
-			$url      = $post_url->guid;
+		$post_info = get_post( $post_ID );
+		if ( ! empty( $post_info ) ) {
+			$url      = $post_info->guid;
 			$posts    = get_posts(
 				array(
 					'post_type'   => 'post',
@@ -223,7 +232,7 @@ class Virtasant_Safe_Media_Admin {
 				$content = $post->post_content;
 				if ( strpos( $content, $url ) !== false ) { // Below PHP 8.0 supported.
 					$id = $post->ID;
-					if ( $ajax_res === 1 ) {
+					if ( 1 === $ajax_res ) {
 						$post_url[] = $id;
 					} else {
 						$post_url[ $id ] = add_query_arg(
@@ -236,17 +245,7 @@ class Virtasant_Safe_Media_Admin {
 					}
 				}
 			}
-			$comma_separated = array();
-			if ( ! empty( $post_url ) ) {
-				foreach ( $post_url as $key => $single ) {
-					$comma_separated[] = "<a href='$single'>$key</a>";
-				}
-				if ( $ajax_res === 1 ) {
-					return $post_url;
-				} else {
-					return implode( ',', $comma_separated );
-				}
-			}
+			return $this->generate_url_links( $post_url, $ajax_res );
 		} else {
 			return '';
 		}
@@ -263,30 +262,19 @@ class Virtasant_Safe_Media_Admin {
 		$args  = array(
 			'taxonomy'   => 'category',
 			'hide_empty' => false,
-			'meta_key'   => 'vitrasant_upload_image_id',
-			'meta_value' => $post_ID,
+			'meta_key'   => 'vitrasant_upload_image_id', // phpcs:ignore
+			'meta_value' => $post_ID, // phpcs:ignore
 		);
 		$terms = get_terms( $args );
 		foreach ( $terms as $term ) {
 			$id = $term->term_id;
-			if ( $ajax_res === 1 ) {
+			if ( 1 === $ajax_res ) {
 				$post_url[] = $id;
 			} else {
 				$post_url[ $id ] = get_edit_term_link( $id );
 			}
 		}
-		$comma_separated = array();
-		if ( ! empty( $post_url ) ) {
-			foreach ( $post_url as $key => $single ) {
-				$comma_separated[] = "<a href='$single'>$key</a>";
-			}
-
-			if ( $ajax_res === 1 ) {
-				return $post_url;
-			} else {
-				return implode( ',', $comma_separated );
-			}
-		}
+		return $this->generate_url_links( $post_url, $ajax_res );
 	}
 
 	/**
@@ -327,9 +315,9 @@ class Virtasant_Safe_Media_Admin {
 	public function vitrasant_custom_media_columns_content( $column_name, $attachment_id ) {
 		if ( 'attached_objects' === $column_name ) {
 
-			$post_id = $attachment_id;
-			$result  = $this->virtasant_linked_articles( $post_id );
-			echo implode( ', ', $result );
+			$post_id = intval( $attachment_id );
+			$result  = $this->virtasant_linked_articles( $post_id ); // $result is already escaped during creation
+			echo implode( ', ', $result ); // phpcs:ignore
 		}
 	}
 
@@ -343,13 +331,13 @@ class Virtasant_Safe_Media_Admin {
 	 * @since    1.0.0
 	 */
 	public function vitrasant_add_custom_attachment_action_field( $form_fields, $post ) {
-		$post_id = $post->ID;
-		$result  = $this->virtasant_linked_articles( $post_id );
-
+		$post_id           = $post->ID;
+		$result            = $this->virtasant_linked_articles( $post_id );
+		$string            = implode( ', ', $result );
 		$form_fields['id'] = array(
 			'label' => __( 'Linked Articles', 'virtasant-safe-media' ),
 			'input' => 'html',
-			'html'  => ' <label><span>' . implode( ', ', $result ) . '</span></label>',
+			'html'  => ' <label><span>' . $string . '</span></label>',
 		);
 
 		return $form_fields;
@@ -362,6 +350,7 @@ class Virtasant_Safe_Media_Admin {
 	 * @since    1.0.0
 	 */
 	public function vitrasant_delete_handler() {
+		check_ajax_referer( 'ajax-nonce', 'security' );
 		if ( isset( $_POST['post_id'] ) ) {
 
 			$post_ID = intval( $_POST['post_id'] );
@@ -417,7 +406,7 @@ class Virtasant_Safe_Media_Admin {
 		$msg            = '';
 		$featured_image = $this->vitrasant_prevent_featured_image_deletion( $post_ID, $ajax_res );
 		if ( ! empty( $featured_image ) ) {
-			if ( $ajax_res === 1 ) {
+			if ( 1 === $ajax_res ) {
 				$featured_image = implode( ',', $featured_image );
 			}
 			$msg .= __( 'It is being used as a featured image. {id}  ', 'virtasant-safe-media' ) . $featured_image . ' ';
@@ -425,7 +414,7 @@ class Virtasant_Safe_Media_Admin {
 		$content_image = $this->vitrasant_prevent_content_image_deletion( $post_ID, $ajax_res );
 
 		if ( ! empty( $content_image ) ) {
-			if ( $ajax_res === 1 ) {
+			if ( 1 === $ajax_res ) {
 				$content_image = implode( ',', $content_image );
 			}
 			$msg .= __( 'It is being used in the content of a post. {id} ', 'virtasant-safe-media' ) . $content_image . ' ';
@@ -434,12 +423,35 @@ class Virtasant_Safe_Media_Admin {
 		$term_image = $this->vitrasant_prevent_term_image_deletion( $post_ID, $ajax_res );
 
 		if ( ! empty( $term_image ) ) {
-			if ( $ajax_res === 1 ) {
+			if ( 1 === $ajax_res ) {
 				$term_image = implode( ',', $term_image );
 			}
 			$msg .= __( 'It is being used in the Term Edit Page. {id} ', 'virtasant-safe-media' ) . $term_image . ' ';
 		}
 		return $msg;
+	}
+
+	/**
+	 * Function generate_url_links escaped url links for admin panel (delete_attachment) .
+	 *
+	 * @param array $post_url containing all links.
+	 * @param int   $ajax_res if its ajax request or not.
+	 * @return array|string|void
+	 */
+	public function generate_url_links( array $post_url, int $ajax_res ) {
+		$comma_separated = array();
+		if ( ! empty( $post_url ) ) {
+			foreach ( $post_url as $key => $single ) {
+				$single            = esc_url( $single );
+				$key               = esc_html( $key );
+				$comma_separated[] = "<a href='$single'>$key</a>";
+			}
+			if ( 1 === $ajax_res ) {
+				return $post_url;
+			} else {
+				return implode( ',', $comma_separated );
+			}
+		}
 	}
 
 
