@@ -1,0 +1,84 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-28 06:49+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: admin/class-virtasant-safe-media-admin.php:64
+msgid ""
+"Deletion Failed because Image is linked to post(s) or term(s) remove the "
+"image from the post(s) or term(s) where it is being used to continue delete. "
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:130
+msgid "Category Metabox"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:138
+msgid "Custom Field"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:141
+msgid "Enter your custom field description"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:296
+msgid "cb"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:297
+msgid "Title"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:298
+msgid "Author"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:299
+msgid "Uploaded To"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:300
+msgid "<i class=\"fa comment-grey-bubble\" aria-hidden=\"true\"></i>"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:301
+msgid "Attached Objects"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:302
+msgid "Date"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:339
+msgid "Linked Articles"
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:413
+msgid "It is being used as a featured image. {id}  "
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:421
+msgid "It is being used in the content of a post. {id} "
+msgstr ""
+
+#: admin/class-virtasant-safe-media-admin.php:430
+msgid "It is being used in the Term Edit Page. {id} "
+msgstr ""
+
+#: includes/class-vitrasant-safe-media-rest.php:176
+msgid "Deletion Success {id} "
+msgstr ""
