@@ -259,13 +259,14 @@ class Virtasant_Safe_Media_Admin {
 	 * @since 1.0.0
 	 */
 	public function vitrasant_prevent_term_image_deletion( $post_ID, $ajax_res = 0 ) {
-		$args  = array(
+		$args     = array(
 			'taxonomy'   => 'category',
 			'hide_empty' => false,
 			'meta_key'   => 'vitrasant_upload_image_id', // phpcs:ignore
 			'meta_value' => $post_ID, // phpcs:ignore
 		);
-		$terms = get_terms( $args );
+		$terms    = get_terms( $args );
+		$post_url = array();
 		foreach ( $terms as $term ) {
 			$id = $term->term_id;
 			if ( 1 === $ajax_res ) {
