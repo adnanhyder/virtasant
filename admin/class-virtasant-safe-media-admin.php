@@ -135,10 +135,10 @@ class Virtasant_Safe_Media_Admin {
 
 		$cmb->add_field(
 			array(
-				'name' => esc_html__( 'Custom Field', 'cmb2' ),
+				'name' => esc_html__( 'Category Image', 'cmb2' ),
 				'id'   => $prefix . 'upload_image',
 				'type' => 'file',
-				'desc' => esc_html__( 'Enter your custom field description', 'cmb2' ),
+
 			)
 		);
 

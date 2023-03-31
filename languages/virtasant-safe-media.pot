@@ -28,7 +28,7 @@ msgid "Category Metabox"
 msgstr ""
 
 #: admin/class-virtasant-safe-media-admin.php:138
-msgid "Custom Field"
+msgid "Category Image"
 msgstr ""
 
 #: admin/class-virtasant-safe-media-admin.php:141
